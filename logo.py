@@ -35,11 +35,6 @@ n_processors = int(os.environ.get("SLURM_CPUS_PER_TASK", multiprocessing.cpu_cou
 # Make sure we don't ask for fewer than 1
 n_processors = max(1, n_processors)
 
-# Limit threading inside BLAS libraries (safe for both cluster + local)
-os.environ["OMP_NUM_THREADS"] = "1"
-os.environ["MKL_NUM_THREADS"] = "1"
-os.environ["OPENBLAS_NUM_THREADS"] = "1"
-
 print(f"Using {n_processors} processors")
 
 # Get spreadsheet filename from command line
