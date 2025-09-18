@@ -30,12 +30,15 @@ import mlr_utils
 
 # Set the number of processors to use for parallel processing
 # Respect SLURM allocation if available, otherwise fall back to local cpu_count()-2
-n_processors = int(os.environ.get("SLURM_CPUS_PER_TASK", multiprocessing.cpu_count() - 2))
+total_cores = int(os.environ.get("SLURM_CPUS_PER_TASK", multiprocessing.cpu_count() - 2))
 
-# Make sure we don't ask for fewer than 1
-n_processors = max(1, n_processors)
+# Always at least 2 cores for the inner stepwise regression
+inner_threads = max(2, total_cores // 8)  # heuristic: at least 1/8 of cores per inner job
 
-print(f"Using {n_processors} processors")
+# Then decide how many LOGO workers we can run at once
+n_logo_workers = max(1, total_cores // inner_threads)
+
+print(f"LOGO parallelization plan: {n_logo_workers} workers × {inner_threads} threads each (total {n_logo_workers*inner_threads}/{total_cores} cores)")
 
 # Get spreadsheet filename from command line
 if len(sys.argv) < 2:
@@ -152,7 +155,7 @@ groups = logo_df[which_logo].values
 #print(groups)
 
 ##Define the individual MLR training and testing: Similar to the normal Mattlab workflow##
-def logo_mlr(X_train, X_test, y_train, y_test, test_group, n_steps, n_candidates, collinearity_cutoff):
+def logo_mlr(X_train, X_test, y_train, y_test, test_group, n_steps, n_candidates, collinearity_cutoff, inner_threads):
     print("Left out:", test_group)
     #Scaling of the parameters
     scaler = StandardScaler()
@@ -169,7 +172,7 @@ def logo_mlr(X_train, X_test, y_train, y_test, test_group, n_steps, n_candidates
     #Fit model
 
     results,models,sortedmodels,candidates = mlr_utils.bidirectional_stepwise_regression(train_df,RESPONSE_LABEL,
-                    n_steps=n_steps,n_candidates=n_candidates,collinearity_cutoff=collinearity_cutoff)
+                    n_steps=n_steps,n_candidates=n_candidates,collinearity_cutoff=collinearity_cutoff, n_processors=inner_threads)
     
     for i in results.index:
         model_terms = results.loc[i,"Model"]
@@ -215,11 +218,10 @@ def logo_mlr(X_train, X_test, y_train, y_test, test_group, n_steps, n_candidates
 
     return logo_results
 
-# Run the LOGO cross-validation in parallel
-logo_result_list = []
-
 start_time = time.perf_counter()  # start timing for the LOGO process
-
+# ------------------------ PREPARE INPUTS ------------------------
+logo_inputs = []
+#Prepare input list
 for train_idx, test_idx in logo.split(parameters_df, response_df, groups):
     # Create train/test subsets
     X_train, X_test = parameters_df.iloc[train_idx], parameters_df.iloc[test_idx]
@@ -227,14 +229,17 @@ for train_idx, test_idx in logo.split(parameters_df, response_df, groups):
     #print(X_train)
     #print(X_test)
     test_group = groups[test_idx][0]
-    result_dict = (logo_mlr(X_train, X_test, y_train, y_test, test_group, n_steps, n_candidates, collinearity_cutoff))
-    logo_result_list.append(result_dict)
+    logo_inputs.append((X_train, X_test, y_train, y_test, test_group, n_steps, n_candidates, collinearity_cutoff, inner_threads))
 
-end_time = time.perf_counter()    # end timing
+# ------------------------ RUN LOGO IN PARALLEL ------------------------
+logo_result_list = Parallel(n_jobs=n_logo_workers)(
+    delayed(logo_mlr)(*args) for args in logo_inputs
+)
+# ------------------------ COLLECT RESULTS ---------------------------
+end_time = time.perf_counter()   
 elapsed = end_time - start_time
 print(f"Total elapsed LOGO time: {elapsed/60:.2f} minutes")
 print("\n")
-
 logo_results_df = pd.DataFrame(logo_result_list)
 logo_results_df_sorted = logo_results_df.sort_values(by="LOGO MAE", ascending=False)
 print("Final LOGO Results:")
