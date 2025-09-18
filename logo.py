@@ -36,7 +36,7 @@ import mlr_utils
 ###-------- Choose substrate or catalyst LOGO ------------###
 which_logo = 'substrate'
 ###-------- Choose model parameters ----------###
-n_steps = 8 # This is the maximum number of parameters you want in your models
+n_steps = 2 # This is the maximum number of parameters you want in your models
 n_candidates = 50 # This is a measure related to how many models are considered at each step. See mlr_utils.bidirectional_stepwise_regression for more details.
 collinearity_cutoff = 0.6 # This is collinearity (r^2) above which parameters won't be included in the same model
 
@@ -209,11 +209,21 @@ def logo_mlr(X_train, X_test, y_train, y_test, test_group, n_steps, n_candidates
         #Plot the final model
         mlr_utils.plot_MLR_model(y_train, y_predictions_train, y_test, y_predictions_test, output_label=RESPONSE_LABEL, plot_xy=True, save_path=f"{output_folder}/MLR_plot_{test_group}.png")
 
+        #Print equation
         print(f'\nParameters:\n{selected_model.intercept_:10.4f} +')
         for i, parameter in enumerate(selected_model_terms):
             print(f'{selected_model.coef_[i]:10.4f} * {parameter}')
         print("\n")
 
+        #Print predicted vs measured ddG for left out group
+        test_identifiers = X_test.index
+        print(f"\nPredicted vs Measured for left-out group: {test_group}")
+        for name, true_val, pred_val in zip(test_identifiers, y_test, y_predictions_test):
+            print(f"{name}: Measured = {true_val:.3f} | Predicted = {pred_val:.3f}")
+        print("\n")
+        
+    
+    #Evaluate Model Stats
     logo_results = {
         "Left Out Group": test_group,
         "Training R^2": np.round(selected_model.score(x_train, y_train), 3),
