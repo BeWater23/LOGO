@@ -1,0 +1,17 @@
+name: logo
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - joblib
+  - statsmodels
+  - tqdm
+  - pip
+  - pip:
+      - mlxtend   # useful for stepwise regression helpers if needed
