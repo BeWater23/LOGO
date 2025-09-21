@@ -22,13 +22,13 @@ conda activate logo
 Run locally:
 
 ```bash
-python logo.py input.xlsx > logo.out &
+python logo.py sctipt_test.xlsx > logo.out &
 ```
 
 Run on the **University of Utah CHPC (Notchpeak)** cluster with the included submission wrapper:
 
 ```bash
-submit_cli.sh python logo.py input.xlsx
+submit_cli.sh python logo.py script_test.xlsx
 ```
 
 Numerically unstable values can cause issues: Make sure too high feature values are filtered out first (>10^10)
