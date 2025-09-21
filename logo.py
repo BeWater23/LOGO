@@ -36,7 +36,7 @@ import mlr_utils
 ###-------- Choose substrate or catalyst LOGO ------------###
 which_logo = 'substrate'
 ###-------- Choose model parameters ----------###
-n_steps = 2 # This is the maximum number of parameters you want in your models
+n_steps = 8 # This is the maximum number of parameters you want in your models
 n_candidates = 50 # This is a measure related to how many models are considered at each step. See mlr_utils.bidirectional_stepwise_regression for more details.
 collinearity_cutoff = 0.6 # This is collinearity (r^2) above which parameters won't be included in the same model
 
@@ -73,7 +73,7 @@ inner_threads = max(2, total_cores // 8)  # heuristic: at least 1/8 of cores per
 # Then decide how many LOGO workers we can run at once
 n_logo_workers = max(1, total_cores // inner_threads)
 
-print(f"LOGO parallelization plan: {n_logo_workers} workers × {inner_threads} threads each (total {n_logo_workers*inner_threads}/{total_cores} cores)")
+print(f"LOGO parallelization plan: {n_logo_workers} workers x {inner_threads} threads each (total {n_logo_workers*inner_threads}/{total_cores} cores)")
 print("LOGO Type:", which_logo)
 
 # Get spreadsheet filename from command line
@@ -221,7 +221,7 @@ def logo_mlr(X_train, X_test, y_train, y_test, test_group, n_steps, n_candidates
         for name, true_val, pred_val in zip(test_identifiers, y_test, y_predictions_test):
             print(f"{name}: Measured = {true_val:.3f} | Predicted = {pred_val:.3f}")
         print("\n")
-        
+
     
     #Evaluate Model Stats
     logo_results = {
