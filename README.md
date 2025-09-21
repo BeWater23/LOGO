@@ -1,7 +1,7 @@
 # LOGO Analysis
 
 This repository provides a Python script to perform **Leave-One-Group-Out (LOGO) analysis** on combinatorial **catalyst/substrate MLR models**.  
-It interfaces directly with the general MLR functions in `mlr_utils.py` from the Sigman Lab’s [python-modeling](https://github.com/sigman-lab) environment.
+It interfaces directly with the general MLR functions in `mlr_utils.py` from the Sigman Lab’s [python-modeling](https://github.com/SigmanGroup/python-modeling) environment.
 
 ---
 
