@@ -12,7 +12,7 @@ If you encounter dependency issues, a clean conda environment can be created fro
 
 ```bash
 conda env create -f logo_env.yml
-conda activate logo_env
+conda activate logo
 ```
 
 ---
@@ -31,7 +31,7 @@ Run on the **University of Utah CHPC (Notchpeak)** cluster with the included sub
 submit_cli.sh python logo.py input.xlsx
 ```
 
-Numerically unstable values can cause issues: Make sure too high feature vales are filtered out first (>10^10)
+Numerically unstable values can cause issues: Make sure too high feature values are filtered out first (>10^10)
 
 ---
 
