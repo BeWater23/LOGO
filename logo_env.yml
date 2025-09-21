@@ -12,6 +12,7 @@ dependencies:
   - joblib
   - statsmodels
   - tqdm
+  - openpyxl
   - pip
   - pip:
       - mlxtend   # useful for stepwise regression helpers if needed
