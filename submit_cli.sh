@@ -1,19 +1,15 @@
 #!/bin/bash
 
-# We assume running this from the script directory
-
 job_directory=$(pwd)
 script=${*}
 name=${1}
-output="${job_directory}/${name}.out"
-error="${job_directory}/${name}.err"
 
 echo "#!/bin/sh
 #SBATCH --job-name=${name}
 #SBATCH --mem=90gb
 #SBATCH --cpus-per-task=32
-#SBATCH -o ${output}
-#SBATCH -e ${error}
+#SBATCH -o ${job_directory}/${name}_%j.out
+#SBATCH -e ${job_directory}/${name}_%j.err
 #SBATCH --partition=notchpeak-shared
 #SBATCH --account=sigman
 #SBATCH --time=24:00:00

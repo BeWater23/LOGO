@@ -168,6 +168,7 @@ def bidirectional_stepwise_regression(data:pd.DataFrame, response_label:str, n_s
     models = {}
 
     for step in [1,2]:
+        print("Number of inner cores:", n_processors)
         print(f'Starting {step} parameter models. Total time taken (sec): %0.2f' %((time.time()-start_time)))
 
         # Create a list of tuples with all the parameter combos to be modeled in steps one and two
